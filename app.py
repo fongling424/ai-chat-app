@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from together import Together
-from flask_cors import CORS  
+from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 import re
@@ -10,8 +10,16 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# 允许前端访问
-CORS(app, resources={r"/chat": {"origins": "https://flask-ai-chat-fongling424s-projects.vercel.app"}})
+# ✅ 允许所有前端访问（测试用，成功后可改回特定域名）
+CORS(app)
+
+# ✅ 确保 API 响应包含 CORS 头
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return response
 
 # 获取 API Key
 TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Chat</title>
+</head>
+<body>
+    <h1>AI Chat</h1>
+    <input id="user_input" type="text" placeholder="输入消息">
+    <button onclick="sendMessage()">发送</button>
+    <p id="response"></p>
+    <p id="error" style="color: red;"></p> <!-- 显示错误信息 -->
+
+    <script>
+        async function sendMessage() {
+            let userMessage = document.getElementById("user_input").value;
+            let responseElement = document.getElementById("response");
+            let errorElement = document.getElementById("error");
+
+            responseElement.innerText = "AI 正在思考...";
+            errorElement.innerText = ""; // 清空错误信息
+
+            try {
+                let response = await fetch("https://ai-chat-app-21lt.onrender.com", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: userMessage })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP 错误！状态码: ${response.status}`);
+                }
+
+                let result = await response.json();
+                if (result.error) {
+                    throw new Error(`服务器错误: ${result.error}`);
+                }
+
+                responseElement.innerText = result.response;
+            } catch (error) {
+                errorElement.innerText = "❌ 发生错误: " + error.message;
+                responseElement.innerText = "";
+            }
+        }
+    </script>
+</body>
+</html>

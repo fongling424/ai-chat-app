@@ -10,19 +10,27 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# 只允许你的 Vercel 前端访问 API
+# 允许前端访问
 CORS(app, resources={r"/chat": {"origins": "https://flask-ai-chat-fongling424s-projects.vercel.app"}})
 
 # 获取 API Key
 TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
 if not TOGETHER_API_KEY:
-    raise ValueError("❌ 缺少 TOGETHER_API_KEY，请在 Railway 环境变量中设置！")
+    raise ValueError("❌ 缺少 TOGETHER_API_KEY，请在 Render 环境变量中设置！")
 
 # 创建 AI 客户端
 client = Together(api_key=TOGETHER_API_KEY)
 
-@app.route("/chat", methods=["POST"])
+# ✅ 主页路由，避免 404
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"message": "✅ Flask API is running!"})
+
+@app.route("/chat", methods=["GET", "POST"])
 def chat():
+    if request.method == "GET":
+        return jsonify({"message": "✅ Chat API is ready! Use POST to send messages."})
+
     try:
         data = request.json
         user_message = data.get("message", "").strip()
@@ -50,6 +58,6 @@ def chat():
         return jsonify({"error": f"服务器错误: {str(e)}"}), 500
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Render 需要用环境变量 PORT
+    port = int(os.environ.get("PORT", 5000))  # 确保使用 Render 的 PORT 变量
+    print(f"✅ 服务器运行在端口 {port}")
     app.run(host="0.0.0.0", port=port)
-
